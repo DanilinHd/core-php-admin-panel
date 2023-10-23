@@ -1836,27 +1836,34 @@ class MysqliDb
      * @throws Exception
      */
     protected function _buildInsertQuery($tableData)
-    {
-        if (!is_array($tableData)) {
-            return;
-        }
-
-        $isInsert = preg_match('/^[INSERT|REPLACE]/', $this->_query);
-        $dataColumns = array_keys($tableData);
-        if ($isInsert) {
-            if (isset ($dataColumns[0]))
-                $this->_query .= ' (`' . implode($dataColumns, '`, `') . '`) ';
-            $this->_query .= ' VALUES (';
-        } else {
-            $this->_query .= " SET ";
-        }
-
-        $this->_buildDataPairs($tableData, $dataColumns, $isInsert);
-
-        if ($isInsert) {
-            $this->_query .= ')';
-        }
+{
+    if (!is_array($tableData)) {
+        return;
     }
+
+    $isInsert = preg_match('/^[INSERT|REPLACE]/', $this->_query);
+    $dataColumns = array_keys($tableData);
+
+    if (is_array($dataColumns)) {
+        if ($isInsert && isset($dataColumns[0]))
+            $this->_query .= ' (`' . implode('`, `', $dataColumns) . '`) ';
+    } else {
+        // Lide com o caso em que $dataColumns é uma string
+        // Pode ser necessário adicionar alguma lógica personalizada aqui
+    }
+
+    if ($isInsert) {
+        $this->_query .= ' VALUES (';
+    } else {
+        $this->_query .= " SET ";
+    }
+
+    $this->_buildDataPairs($tableData, $dataColumns, $isInsert);
+
+    if ($isInsert) {
+        $this->_query .= ')';
+    }
+}
 
     /**
      * Abstraction method that will build the part of the WHERE conditions
